@@ -1,0 +1,97 @@
+#!/usr/bin/env bash
+# Summary: Install/Uninstall/Update ENVs or plugins
+#
+# Usage: anyenv target SUBCOMMAND ARGUMENTS...
+#
+# Commands:
+#   install    Install ENVs or plugins
+#   uninstall  Uninstall ENVs or plugins
+#   update     Update ENVs or plugins
+
+### common functions
+
+READLINK=$(type -p greadlink readlink | head -1)
+if [ -z "$READLINK" ]; then
+  echo "anyenv: cannot find readlink - are you missing GNU coreutils?" >&2
+  exit 1
+fi
+
+resolve_link() {
+  $READLINK "$1"
+}
+
+abs_dirname() {
+  local cwd
+  cwd="$(pwd)"
+  # Separate declaration and assignment to avoid masking return values.
+  #
+  # https://github.com/koalaman/shellcheck/wiki/SC2155
+
+  local path="$1"
+
+  while [ -n "$path" ]; do
+    cd "${path%/*}"
+    local name="${path##*/}"
+    path="$(resolve_link "$name" || true)"
+  done
+
+  pwd
+  cd "$cwd"
+}
+
+### target functions
+
+# Provide anyenv completions
+completions() {
+  echo --help
+  echo --version
+  echo install
+  echo uninstall
+  echo update
+}
+
+usage() {
+  anyenv-help target 2>/dev/null
+  [ -z "$1" ] || exit "$1"
+}
+
+main() {
+  command="$1"
+  case "$command" in
+  "" | "-h" | "--help")
+    usage 0
+    ;;
+  "--complete")
+    completions
+    exit
+    ;;
+  "-v" | "--version")
+    exec anyenv-target---version
+    ;;
+  *)
+    command_path="$(command -v "anyenv-target-$command" || true)"
+    if [ -z "$command_path" ]; then
+      echo "anyenv-target: no such command \`$command'" >&2
+      exit 1
+    fi
+
+    shift 1
+    exec "$command_path" "$@"
+    ;;
+  esac
+}
+
+if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then
+  set -e
+  [ -z "$ANYENV_DEBUG" ] || set -x
+
+  XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-${HOME}/.config}"
+
+  bin_path="$(abs_dirname "$0")"
+  ANYENV_TARGET_ROOT="$(dirname "$bin_path")"
+  export ANYENV_TARGET_ROOT
+
+  export PATH="${bin_path}:$PATH"
+
+  main "$@"
+fi

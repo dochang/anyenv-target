@@ -1,0 +1,136 @@
+#!/usr/bin/env bash
+# Summary: Update all targets
+#
+# Usage: anyenv target update [-f|--force] [--without-plugins] [TARGET...]
+#
+#   -f/--force         Force update
+#   -v/--verbose       Run verbosely
+#   --without-plugins  Update ENVs, but not update plugins of each ENVs
+#
+# See `anyenv envs` for a complete list of installed envs.
+
+# shellcheck source=lib/common.bash
+. "${ANYENV_TARGET_ROOT:-$(dirname "${BASH_SOURCE[0]}")/..}/lib/common.bash"
+
+### update functions
+
+# Provide anyenv completions
+update_completions() {
+  echo --help
+  echo --force
+  echo --verbose
+  echo --without-plugins
+  echo anyenv
+  exec anyenv envs --bare
+}
+
+update_usage() {
+  anyenv-help target-update 2>/dev/null
+  [ -z "$1" ] || exit "$1"
+}
+
+print_use_forceopt() {
+  echo "Failed to update '$1'. Use 'force' option." >&2
+}
+
+update_git() {
+  # Check if current branch has tracking branch.
+  if git -C "$TARGET_DIR" rev-parse --abbrev-ref '@{u}' >/dev/null 2>&1; then
+    if [ -n "$FORCE" ]; then
+      git -C "$TARGET_DIR" pull --force --ff --autostash
+    else
+      git -C "$TARGET_DIR" pull --force --ff-only || print_use_forceopt "$(target_name)"
+    fi
+  fi
+}
+
+update_plugins() {
+  shopt -s nullglob
+  local plugin_dir env
+  plugin_dir="${TARGET_DIR}/plugins"
+  env="$ENV"
+  for plugin in "$plugin_dir"/*; do
+    update_target "${env}/$(basename "$plugin")"
+    print_horizontal_separator
+  done
+  shopt -u nullglob
+}
+
+update_target() {
+  local target
+  target="$1"
+
+  set_env_and_plugin "$target"
+
+  set_target_dir
+
+  if [ -d "${TARGET_DIR}/.git" ]; then
+    if [ -n "$VERBOSE" ]; then
+      echo "Updating '$(target_name)'..."
+    fi
+
+    update_git
+
+  elif [ -d "${TARGET_DIR}" ]; then
+    if [ -n "$VERBOSE" ]; then
+      echo "Skipping '$(target_name)'; not git repo"
+    fi
+  else
+    echo "anyenv: target '$(target_name)' does not exist" >&2
+  fi
+
+  # shellcheck disable=SC2153
+  if [ "$ENV" = "$PLUGIN" ] && [ -z "$WITHOUT_PLUGINS" ]; then
+    update_plugins
+  fi
+}
+
+get_allenvs() {
+  echo "anyenv $(anyenv-envs | tr '\n' ' ')"
+}
+
+cmd_update() {
+  if [ "$1" = "--complete" ]; then
+    update_completions
+    exit
+  fi
+
+  parse_options "$@"
+  for option in "${OPTIONS[@]}"; do
+    case "$option" in
+    "h" | "help")
+      update_usage 0
+      ;;
+    "f" | "force")
+      FORCE=true
+      ;;
+    "v" | "verbose")
+      VERBOSE=true
+      ;;
+    "without-plugins")
+      WITHOUT_PLUGINS=true
+      ;;
+    *)
+      echo "no such option: ${option}" >&2
+      echo
+      update_usage 1 >&2
+      ;;
+    esac
+  done
+
+  TARGETS=("${ARGUMENTS[@]}")
+  if [ "${#ARGUMENTS[@]}" -eq 0 ]; then
+    IFS=" " read -r -a TARGETS <<<"$(get_allenvs)"
+  fi
+
+  for arg in "${TARGETS[@]}"; do
+    update_target "$arg"
+  done
+}
+
+if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then
+  set -e
+  [ -z "$ANYENV_DEBUG" ] || set -x
+
+  cmd_update "${@}"
+fi

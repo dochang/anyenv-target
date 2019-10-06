@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+# Usage: anyenv target completions <command> [arg1 arg2...]
+
+cmd_completions() {
+  COMMAND="$1"
+  if [ -z "$COMMAND" ]; then
+    exec anyenv target --complete
+  fi
+
+  COMMAND_PATH="$(command -v "anyenv-target-$COMMAND")"
+  if grep -i "^\([#%]\|--\|//\) provide anyenv completions" "$COMMAND_PATH" >/dev/null; then
+    shift
+    exec "$COMMAND_PATH" --complete "$@"
+  fi
+}
+
+if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then
+  set -e
+  [ -z "$ANYENV_DEBUG" ] || set -x
+
+  cmd_completions "${@}"
+fi

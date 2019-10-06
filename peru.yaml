@@ -1,0 +1,10 @@
+---
+imports:
+  bash_shell_mock:
+    # https://github.com/buildinspace/peru/blob/1.2.0/peru/parser.py#L37
+    - lib/bats_modules/bash_shell_mock
+    - libexec/bats_modules/bash_shell_mock
+    - test/bats_modules/bash_shell_mock
+
+git module bash_shell_mock:
+  url: https://github.com/capitalone/bash_shell_mock.git

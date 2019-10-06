@@ -1,0 +1,100 @@
+---
+kind: pipeline
+name: default
+steps:
+  - name: 'install locales'
+    image: 'buildpack-deps:stable'
+    commands:
+      - apt-get update
+      - apt-get install --yes locales-all
+    volumes:
+      - name: locales
+        path: /usr/lib/locale
+  - name: 'install Linuxbrew'
+    image: 'buildpack-deps:stable'
+    commands:
+      - 'apt-get update'
+      - 'apt-get install --yes git'
+      - 'git clone https://github.com/Homebrew/brew /home/linuxbrew/.linuxbrew/Homebrew'
+      - 'mkdir -p /home/linuxbrew/.linuxbrew/bin'
+      - 'ln -s ../Homebrew/bin/brew /home/linuxbrew/.linuxbrew/bin'
+    volumes:
+      - name: linuxbrew
+        path: /home/linuxbrew/.linuxbrew
+  - name: 'install ci deps'
+    image: 'buildpack-deps:stable'
+    commands:
+      - 'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"'
+      - brew update
+      - brew bundle
+      - peru sync
+    volumes:
+      - name: locales
+        path: /usr/lib/locale
+      - name: linuxbrew
+        path: /home/linuxbrew/.linuxbrew
+      - name: cache
+        path: /root/.cache
+    environment:
+      HOMEBREW_DEVELOPER: 1
+      HOMEBREW_NO_AUTO_UPDATE: 1
+      HOMEBREW_NO_ANALYTICS: 1
+      HOMEBREW_NO_INSTALL_CLEANUP: 1
+      PERU_CACHE_DIR: $HOME/.cache/peru
+  - name: lint
+    image: 'buildpack-deps:stable'
+    commands:
+      - 'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"'
+      - brew install ruby node
+      - make lint-deps
+      - make lint
+    volumes:
+      - name: locales
+        path: /usr/lib/locale
+      - name: linuxbrew
+        path: /home/linuxbrew/.linuxbrew
+      - name: cache
+        path: /root/.cache
+  - name: test
+    image: 'buildpack-deps:stable'
+    commands:
+      - 'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"'
+      # Bash 4.4+ disallow that kcov sets `PS4` when running as root.  Also,
+      # bats does not work with `kcov --bash-method=DEBUG`.  We have to run
+      # test as a non-root user.
+      #
+      # https://github.com/SimonKagstrom/kcov/issues/213#issuecomment-378249216
+      # https://github.com/SimonKagstrom/kcov/issues/234#issuecomment-363013297
+      # https://security-tracker.debian.org/tracker/CVE-2016-7543
+      - useradd testuser
+      - 'export TEST_TMPDIR=$(mktemp -d)'
+      - 'chown -R testuser . $TEST_TMPDIR'
+      - 'su -c "TEST_TMPDIR=$TEST_TMPDIR make test" testuser'
+      - chown -R root .
+    volumes:
+      - name: locales
+        path: /usr/lib/locale
+      - name: linuxbrew
+        path: /home/linuxbrew/.linuxbrew
+  - name: coverage
+    image: 'buildpack-deps:stable'
+    failure: ignore
+    commands:
+      # https://docs.codecov.io/docs/about-the-codecov-bash-uploader
+      # https://docs.codecov.io/docs/supported-ci-providers
+      - 'curl -s https://codecov.io/bash | bash'
+    environment:
+      CODECOV_TOKEN:
+        from_secret: 'codecov-upload-token'
+volumes:
+  - name: cache
+    temp: {}
+  - name: locales
+    temp: {}
+  - name: linuxbrew
+    temp: {}
+---
+kind: secret
+name: codecov-upload-token
+data: 'z1esy/MHWVnCY8epSwh3UAn+fviMhfUUKyqf2tKeMboA+9M5ZGfMy4BH+KJD/rzRW/QSFQ1n0GnyiL3lXROaOQ=='
+...

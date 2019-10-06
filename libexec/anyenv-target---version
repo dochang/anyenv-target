@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+# Summary: Display the version of anyenv
+#
+# Displays the version number of this anyenv release, including the
+# current revision from git, if available.
+#
+# The format of the git revision is:
+#   <version>-<num_commits>-<git_sha>
+# where `num_commits` is the number of commits since `version` was
+# tagged.
+
+cmd___version() {
+  version=""
+
+  if cd "${ANYENV_TARGET_ROOT:-$(dirname "${BASH_SOURCE[0]}")/..}" 2>/dev/null; then
+    git_revision="$(git describe --tags HEAD 2>/dev/null || true)"
+    git_revision="${git_revision#v}"
+  fi
+
+  echo "anyenv-target ${git_revision:-$version}"
+}
+
+if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then
+  set -e
+  [ -n "$ANYENV_DEBUG" ] && set -x
+
+  cmd___version "$@"
+fi

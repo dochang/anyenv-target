@@ -1,0 +1,220 @@
+#!/usr/bin/env bash
+# Summary: Install targets
+#
+# Usage: anyenv target install [OPTIONS...] TARGET[=URL][@REF] [TARGET[=URL][@REF] ...]
+#
+#   -f/--force          Install even if the target appears to be installed already
+#   -v/--verbose        Run verbosely
+#   -s/--skip-existing  Skip if the version appears to be installed already
+#   -h/--help           Show this message
+
+# shellcheck source=lib/common.bash
+. "${ANYENV_TARGET_ROOT:-$(dirname "${BASH_SOURCE[0]}")/..}/lib/common.bash"
+
+### install functions
+
+# Provide anyenv completions
+install_completions() {
+  echo --help
+  echo --force
+  echo --verbose
+  echo --skip-existing
+}
+
+install_usage() {
+  anyenv-help target-install 2>/dev/null
+  [ -z "$1" ] || exit "$1"
+}
+
+set_install_type() {
+  INSTALL_TYPE=install
+  if [ -d "$TARGET_DIR" ]; then
+    if [ -n "$SKIP_EXISTING" ]; then
+      INSTALL_TYPE=skip
+    elif [ -n "$FORCE" ]; then
+      INSTALL_TYPE=reinstall
+    else
+      echo "anyenv: ${TARGET_DIR} already exists"
+      echo "Reinstallation keeps versions directories"
+      read -r -p "continue with installation? (y/N) "
+
+      case "$REPLY" in
+      y* | Y*) INSTALL_TYPE=reinstall ;;
+      *) INSTALL_TYPE=skip ;;
+      esac
+    fi
+  fi
+}
+
+fetch_git() {
+  if [ -n "$GIT_REF" ]; then
+    git clone --branch "$GIT_REF" "$GIT_URL" "$BUILD_DIR"
+  else
+    git clone "$GIT_URL" "$BUILD_DIR"
+  fi
+}
+
+remove_previous_env() {
+  mv "${TARGET_DIR}/versions" "${BUILD_DIR}/versions"
+  mv "${TARGET_DIR}/version" "${BUILD_DIR}/version"
+  mv "${TARGET_DIR}" "${TARGET_DIR}.prev"
+}
+
+remove_previous_plugin() {
+  # No need to backup plugin. Just remove it.
+  rm -rf "${TARGET_DIR}"
+}
+
+remove_before_install() {
+  if [ "$ENV" = "$PLUGIN" ]; then
+    remove_previous_env
+  else
+    remove_previous_plugin
+  fi
+}
+
+install_from_git() {
+  if [ "$INSTALL_TYPE" != skip ]; then
+    if [ -n "$VERBOSE" ]; then
+      if [ -n "$GIT_REF" ]; then
+        echo "Installing '$(target_name)' from '${GIT_URL}@${GIT_REF}'..."
+      else
+        echo "Installing '$(target_name)' from '${GIT_URL}'..."
+      fi
+    fi
+
+    BUILD_ROOT="$(mktemp -d)"
+    BUILD_DIR="${BUILD_ROOT}/$PLUGIN"
+
+    fetch_git
+
+    if [ "$INSTALL_TYPE" = reinstall ]; then
+      remove_before_install
+    fi
+
+    local target_parent_dir
+    target_parent_dir="$(dirname "$TARGET_DIR")"
+    [ -d "$target_parent_dir" ] || mkdir -p "$target_parent_dir"
+    mv "$BUILD_DIR" "$TARGET_DIR"
+
+    rm -rf "$BUILD_ROOT"
+
+    print_horizontal_separator
+  fi
+}
+
+read_source() {
+  local src_prefix src
+
+  SRC_URL=""
+  SRC_REF=""
+
+  root="${ANYENV_TARGET_ROOT:-$(dirname "${BASH_SOURCE[0]}")/..}"
+  for src_prefix in "${XDG_CONFIG_HOME}/anyenv/sources" "${root}/share/anyenv/sources"; do
+    src="${src_prefix}/${ENV}/${PLUGIN}"
+    if [ -f "$src" ]; then
+      read -r SRC_URL SRC_REF <"$src"
+      break
+    fi
+  done
+}
+
+set_repo_url_and_ref() {
+  if [ -n "$ARG_URL" ]; then
+    GIT_URL="$ARG_URL"
+    GIT_REF="$ARG_REF"
+  elif [ -n "$ARG_REF" ]; then
+    GIT_URL="https://github.com/${ENV}/${PLUGIN}.git"
+    GIT_REF="$ARG_REF"
+  else
+    read_source
+    if [ -n "$SRC_URL" ]; then
+      GIT_URL="$SRC_URL"
+      GIT_REF="$SRC_REF"
+    else
+      GIT_URL="https://github.com/${ENV}/${PLUGIN}.git"
+      GIT_REF=""
+    fi
+  fi
+}
+
+install_target() {
+  local target
+
+  target="${1}"
+  ARG_URL="${1}"
+  ARG_REF="${1}"
+
+  target="${target%%@*}"
+  target="${target%%=*}"
+  ARG_URL="${ARG_URL%%@*}" # remove @-part first in order to avoid the case of `a@b=c`
+  ARG_URL="${ARG_URL##*=}"
+  ARG_REF="${ARG_REF##*@}"
+
+  if [ "$ARG_URL" = "$target" ]; then
+    ARG_URL=
+  fi
+  if [ "$ARG_REF" = "$1" ]; then
+    ARG_REF=
+  fi
+
+  set_env_and_plugin "$target"
+
+  set_repo_url_and_ref
+
+  if [ "$ENV" = anyenv ] && [ "$ENV" = "$PLUGIN" ]; then
+    echo "anyenv is already installed." >&2
+    return
+  fi
+
+  set_target_dir
+
+  if [ "$ENV" != "$PLUGIN" ] && [ ! -d "$ENV_DIR" ]; then
+    echo "anyenv: unable to install \`$(target_name)'. \`${ENV}' not installed." >&2
+    return
+  fi
+
+  set_install_type
+
+  install_from_git
+
+}
+
+cmd_install() {
+  if [ "$1" = "--complete" ]; then
+    install_completions
+    exit
+  fi
+
+  parse_options "$@"
+  for option in "${OPTIONS[@]}"; do
+    case "$option" in
+    "h" | "help")
+      install_usage 0
+      ;;
+    "f" | "force")
+      FORCE=true
+      ;;
+    "s" | "skip-existing")
+      SKIP_EXISTING=true
+      ;;
+    "v" | "verbose")
+      VERBOSE=true
+      ;;
+    *)
+      install_usage 1
+      ;;
+    esac
+  done
+
+  for arg in "${ARGUMENTS[@]}"; do
+    install_target "$arg"
+  done
+}
+
+if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then
+  set -e
+  [ -z "$ANYENV_DEBUG" ] || set -x
+
+  cmd_install "${@}"
+fi
