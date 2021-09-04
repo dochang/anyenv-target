@@ -1,5 +1,5 @@
 @test "main" {
-  TESTDIR="$(mktemp -d -p "${TEST_TMPDIR:-BATS_TMPDIR}")"
+  TESTDIR="$(mktemp -d -p "${TEST_TMPDIR:-${BATS_TMPDIR}}")"
 
   export ANYENV_ROOT="${TESTDIR}/anyenv"
   export ANYENV_DEFINITION_ROOT="${TESTDIR}/anyenv-install"
