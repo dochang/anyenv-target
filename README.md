@@ -56,7 +56,7 @@ named `rbenv`.
 You can also use the short form for a target by the following rules:
 
 TARGET (short form) | TARGET (full form) | ENV     | PLUGIN
-------------------- | ------------------ | ------- | -----------
+--------------------|--------------------|---------|------------
 foo/bar             | foo/bar            | foo     | bar
 foo/foo-bar         | foo/foo-bar        | foo     | foo-bar
 foo/baz-bar         | foo/baz-bar        | foo     | baz-bar
@@ -72,7 +72,7 @@ foo-bar/            | foo-bar/foo-bar    | foo-bar | foo-bar
 For example:
 
 TARGET (short form) | TARGET (full form) | ENV   | PLUGIN
-------------------- | ------------------ | ----- | ----------
+--------------------|--------------------|-------|-----------
 rbenv/rbenv-each    | rbenv/rbenv-each   | rbenv | rbenv-each
 rbenv               | rbenv/rbenv        | rbenv | rbenv
 rbenv-each          | rbenv/rbenv-each   | rbenv | rbenv-each
