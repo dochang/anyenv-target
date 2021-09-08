@@ -22,7 +22,7 @@ cmd___version() {
 
 if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then
   set -e
-  [ -n "$ANYENV_DEBUG" ] && set -x
+  [ -z "$ANYENV_DEBUG" ] || set -x
 
   cmd___version "$@"
 fi
