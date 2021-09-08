@@ -3,7 +3,15 @@
 [![Build Status](https://cloud.drone.io/api/badges/dochang/anyenv-target/status.svg)](https://cloud.drone.io/dochang/anyenv-target)
 [![codecov](https://codecov.io/gh/dochang/anyenv-target/branch/master/graph/badge.svg)](https://codecov.io/gh/dochang/anyenv-target)
 [![License](https://img.shields.io/badge/license-MIT-green)](https://dochang.mit-license.org/)
+<!-- markdown-link-check-disable -->
 [![Say Thanks!](https://img.shields.io/badge/say-thanks-green)](https://saythanks.io/to/dochang)
+<!--
+See the following issues for details.
+
+<https://github.com/BlitzKraft/saythanks.io/issues/60>
+<https://github.com/BlitzKraft/saythanks.io/issues/103>
+-->
+<!-- markdown-link-check-enable -->
 
 `anyenv-target` is an [anyenv] plugin that provides `anyenv target` command to
 install/update/uninstall envs or plugins as targets.
