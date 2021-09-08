@@ -86,8 +86,8 @@ Remember, `rbenv/rbenv` means the env `rbenv`, **NOT** a plugin named `rbenv`.
 When installing a target, anyenv will check the source url in the file
 `SOURCE_DIR/ENV/PLUGIN`. Anyenv will try `SOURCE_DIR` in this order:
 
-  - `$XDG_CONFIG_HOME/anyenv/sources` (default: `$HOME/.config/anyenv/sources`)
-  - `$ANYENV_ROOT/share/anyenv/sources`
+- `$XDG_CONFIG_HOME/anyenv/sources` (default: `$HOME/.config/anyenv/sources`)
+- `$ANYENV_ROOT/share/anyenv/sources`
 
 The source is the git url downloaded by anyenv. If you want to use a branch
 other than the default branch, put
