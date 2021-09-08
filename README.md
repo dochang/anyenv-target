@@ -31,19 +31,19 @@ git clone https://github.com/dochang/anyenv-target.git $(anyenv root)/plugins/an
 ## Usage
 
 ```
-$ anyenv target install rbenv
-$ anyenv target install rbenv@master
-$ anyenv target install rbenv=https://github.com/rbenv/rbenv.git
-$ anyenv target install rbenv=https://github.com/rbenv/rbenv.git@master
-$ anyenv target install rbenv-each
-$ anyenv target install rbenv/rbenv-each
-$ anyenv target install rbenv/ruby-build
-$ anyenv target install rbenv/ruby-build@master
-$ anyenv target install rbenv/ruby-build=https://github.com/rbenv/ruby-build.git
-$ anyenv target install rbenv/ruby-build=https://github.com/rbenv/ruby-build.git@master
-$ anyenv target install rbenv rbenv-each rbenv/ruby-build
-$ anyenv target update pyenv rbenv-each rbenv/ruby-build
-$ anyenv target uninstall pyenv rbenv-each rbenv/ruby-build
+anyenv target install rbenv
+anyenv target install rbenv@master
+anyenv target install rbenv=https://github.com/rbenv/rbenv.git
+anyenv target install rbenv=https://github.com/rbenv/rbenv.git@master
+anyenv target install rbenv-each
+anyenv target install rbenv/rbenv-each
+anyenv target install rbenv/ruby-build
+anyenv target install rbenv/ruby-build@master
+anyenv target install rbenv/ruby-build=https://github.com/rbenv/ruby-build.git
+anyenv target install rbenv/ruby-build=https://github.com/rbenv/ruby-build.git@master
+anyenv target install rbenv rbenv-each rbenv/ruby-build
+anyenv target update pyenv rbenv-each rbenv/ruby-build
+anyenv target uninstall pyenv rbenv-each rbenv/ruby-build
 ```
 
 ## Target
@@ -105,12 +105,12 @@ You can also override the url and default branch in the argument, using
 `TARGET[=URL][@REF]`. For example:
 
 ```
-$ anyenv target install rbenv@master
-$ anyenv target install rbenv=https://github.com/rbenv/rbenv.git
-$ anyenv target install rbenv=https://github.com/rbenv/rbenv.git@master
-$ anyenv target install rbenv/ruby-build@master
-$ anyenv target install rbenv/ruby-build=https://github.com/rbenv/ruby-build.git
-$ anyenv target install rbenv/ruby-build=https://github.com/rbenv/ruby-build.git@master
+anyenv target install rbenv@master
+anyenv target install rbenv=https://github.com/rbenv/rbenv.git
+anyenv target install rbenv=https://github.com/rbenv/rbenv.git@master
+anyenv target install rbenv/ruby-build@master
+anyenv target install rbenv/ruby-build=https://github.com/rbenv/ruby-build.git
+anyenv target install rbenv/ruby-build=https://github.com/rbenv/ruby-build.git@master
 ```
 
 ## License
