@@ -23,14 +23,14 @@ This project is a successor of [anyenv/anyenv#48].
 
 ## Installation
 
-```
+```sh
 mkdir -p $(anyenv root)/plugins
 git clone https://github.com/dochang/anyenv-target.git $(anyenv root)/plugins/anyenv-target
 ```
 
 ## Usage
 
-```
+```sh
 anyenv target install rbenv
 anyenv target install rbenv@master
 anyenv target install rbenv=https://github.com/rbenv/rbenv.git
@@ -92,7 +92,7 @@ When installing a target, anyenv will check the source url in the file
 The source is the git url downloaded by anyenv. If you want to use a branch
 other than the default branch, put
 
-```
+```text
 <GIT_URL> <GIT_REF>
 ```
 
@@ -104,7 +104,7 @@ If the source file does not exist, anyenv will try
 You can also override the url and default branch in the argument, using
 `TARGET[=URL][@REF]`. For example:
 
-```
+```sh
 anyenv target install rbenv@master
 anyenv target install rbenv=https://github.com/rbenv/rbenv.git
 anyenv target install rbenv=https://github.com/rbenv/rbenv.git@master
