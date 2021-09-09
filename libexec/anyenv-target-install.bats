@@ -42,6 +42,11 @@ teardown() {
   BUILD_ROOT=/path/to
   BUILD_DIR="$BUILD_ROOT/anyenv"
   TARGET_DIR="/target/dir"
+  shellmock_expect foo --match "1"
+  foo 1
+  # We have to call `foo` here because `shellmock_expect` does not create
+  # `shellmock.out` if its commands are not invoked, that will cause
+  # `shellmock_verify` fails.
   shellmock_expect mktemp --match "-d" --output "$BUILD_ROOT"
   shellmock_expect git --match "clone $GIT_URL $BUILD_DIR"
   shellmock_expect mkdir --match "-p $(dirname "$TARGET_DIR")"
@@ -52,7 +57,7 @@ teardown() {
   test "$status" = "0"
   test "$output" = ""
   # shellcheck disable=SC2154
-  test "${#capture[@]}" = "0"
+  test "${#capture[@]}" = "1"
 }
 
 @test "install_from_git INSTALL_TYPE=install" {
