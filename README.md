@@ -1,9 +1,9 @@
 # anyenv-target
 
+<!-- markdown-link-check-disable -->
 [![Build Status](https://cloud.drone.io/api/badges/dochang/anyenv-target/status.svg)](https://cloud.drone.io/dochang/anyenv-target)
 [![codecov](https://codecov.io/gh/dochang/anyenv-target/branch/master/graph/badge.svg)](https://codecov.io/gh/dochang/anyenv-target)
 [![License](https://img.shields.io/badge/license-MIT-green)](https://dochang.mit-license.org/)
-<!-- markdown-link-check-disable -->
 [![Say Thanks!](https://img.shields.io/badge/say-thanks-green)](https://saythanks.io/to/dochang)
 <!--
 See the following issues for details.
