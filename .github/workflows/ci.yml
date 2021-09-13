@@ -6,6 +6,33 @@ env:
   GUIX_PACK_ROOT: /opt/guix
   STOW_TARGET: /opt/stow
 jobs:
+  Mega-Linter:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      # Mega-Linter
+      - name: Mega-Linter
+        id: ml
+        # You can override Mega-Linter flavor used to have faster performances
+        # More info at https://nvuillam.github.io/mega-linter/flavors/
+        uses: nvuillam/mega-linter@v4
+        env:
+          # All available variables are described in documentation
+          # https://nvuillam.github.io/mega-linter/configuration/
+          VALIDATE_ALL_CODEBASE: true
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # Upload Mega-Linter artifacts
+      - name: Archive production artifacts
+        if: ${{ success() }} || ${{ failure() }}
+        uses: actions/upload-artifact@v2
+        with:
+          name: Mega-Linter reports
+          path: |
+            report
+            mega-linter.log
+
   guix-pack:
     runs-on: ubuntu-latest
     steps:
@@ -40,7 +67,9 @@ jobs:
           # /tmp/guix-pack.tar.gz is a symlink which points to Guix store.  Copy it.
 
   test:
-    needs: guix-pack
+    needs:
+      - Mega-Linter
+      - guix-pack
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -56,28 +85,6 @@ jobs:
         run: |
           mkdir -p "${{ env.GUIX_PACK_ROOT }}"
           tar x -z -f "${{ env.GUIX_PACK_CACHE }}" -C "${{ env.GUIX_PACK_ROOT }}" -v
-
-      # Mega-Linter
-      - name: Mega-Linter
-        id: ml
-        # You can override Mega-Linter flavor used to have faster performances
-        # More info at https://nvuillam.github.io/mega-linter/flavors/
-        uses: nvuillam/mega-linter@v4
-        env:
-          # All available variables are described in documentation
-          # https://nvuillam.github.io/mega-linter/configuration/
-          VALIDATE_ALL_CODEBASE: true
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      # Upload Mega-Linter artifacts
-      - name: Archive production artifacts
-        if: ${{ success() }} || ${{ failure() }}
-        uses: actions/upload-artifact@v2
-        with:
-          name: Mega-Linter reports
-          path: |
-            report
-            mega-linter.log
 
       - name: Test
         run: |
