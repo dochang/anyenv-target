@@ -14,8 +14,6 @@ steps:
 kind: pipeline
 type: docker
 name: default
-depends_on:
-  - Mega-Linter
 steps:
   - name: Test
     image: buildpack-deps:latest
