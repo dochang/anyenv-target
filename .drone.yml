@@ -6,7 +6,7 @@ workspace:
   path: /drone/src
 steps:
   - name: Lint
-    image: 'nvuillam/mega-linter:v4'
+    image: 'megalinter/megalinter:v5'
     environment:
       DEFAULT_WORKSPACE: /drone/src
 
