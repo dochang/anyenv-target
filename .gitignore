@@ -5,3 +5,5 @@ bats_modules
 
 ### kcov ###
 coverage
+
+megalinter-reports/

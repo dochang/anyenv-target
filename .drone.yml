@@ -6,7 +6,7 @@ workspace:
   path: /drone/src
 steps:
   - name: Lint
-    image: 'megalinter/megalinter:v5'
+    image: 'oxsecurity/megalinter:v6'
     environment:
       DEFAULT_WORKSPACE: /drone/src
 
