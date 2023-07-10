@@ -7,10 +7,8 @@ export STOW_DIR
 STOW_SRC="${STOW_SRC:-${STOW_TARGET}/src}"
 export STOW_SRC
 
-test_on_github_actions() {
-  GUIX_PACK_ROOT="${GUIX_PACK_ROOT:-/opt/guix}"
-  export GUIX_PACK_ROOT
-  PATH="${STOW_TARGET}/bin:${GUIX_PACK_ROOT}/bin:$PATH"
+test() {
+  PATH="${STOW_TARGET}/bin:$PATH"
 
   mkdir -p "${STOW_TARGET}"
 
@@ -22,6 +20,4 @@ test_on_github_actions() {
   kcov --include-path=. coverage bats lib libexec test
 }
 
-if [ "$GITHUB_ACTIONS" = true ]; then
-  test_on_github_actions
-fi
+test
