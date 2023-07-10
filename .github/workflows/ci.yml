@@ -3,8 +3,6 @@ on:
   - push
 permissions: read-all
 env:
-  GUIX_PACK_CACHE: /opt/guix-pack.tar.gz
-  GUIX_PACK_ROOT: /opt/guix
   STOW_TARGET: /opt/stow
 jobs:
   Mega-Linter:
@@ -34,63 +32,24 @@ jobs:
             megalinter-reports
             mega-linter.log
 
-  guix-pack:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-
-      - name: Cache Guix pack
-        id: guix_pack_cache
-        uses: actions/cache@v3
-        with:
-          path: ${{ env.GUIX_PACK_CACHE }}
-          key: guix-pack-cache-${{ hashFiles('manifest.scm') }}
-
-      - name: Guix cache
-        if: ${{ ! steps.guix_pack_cache.outputs.cache-hit }}
-        uses: actions/cache@v3
-        with:
-          path: |
-            ~/.cache/guix
-          key: guix-cache-${{ hashFiles('**/manifest.scm') }}
-          restore-keys: |
-            guix-cache-
-
-      - name: Install Guix
-        if: ${{ ! steps.guix_pack_cache.outputs.cache-hit }}
-        uses: PromyLOPh/guix-install-action@v1
-
-      - name: Guix Pack
-        if: ${{ ! steps.guix_pack_cache.outputs.cache-hit }}
-        run: |
-          guix pack --format=tarball --relocatable --relocatable --symlink=/bin=bin --root=/tmp/guix-pack.tar.gz --manifest=manifest.scm
-          cp /tmp/guix-pack.tar.gz "${{ env.GUIX_PACK_CACHE }}"
-          # /tmp/guix-pack.tar.gz is a symlink which points to Guix store.  Copy it.
-
   test:
-    needs:
-      - guix-pack
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
 
-      # jscpd:ignore-start
-      - name: Cache Guix pack
-        id: guix_pack_cache
-        uses: actions/cache@v3
-        with:
-          path: ${{ env.GUIX_PACK_CACHE }}
-          key: guix-pack-cache-${{ hashFiles('manifest.scm') }}
-
-      # jscpd:ignore-end
-      - name: Unpack Guix Pack
+      - name: Install homebrew
         run: |
-          mkdir -p "${{ env.GUIX_PACK_ROOT }}"
-          tar x -z -f "${{ env.GUIX_PACK_CACHE }}" -C "${{ env.GUIX_PACK_ROOT }}" -v
+          bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+        env:
+          NONINTERACTIVE: 1
 
       - name: Test
         run: |
+          eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+          brew bundle install
           ./scripts/test.sh
+        env:
+          HOMEBREW_BUNDLE_NO_LOCK: 1
 
       - name: Coverage
         uses: codecov/codecov-action@v3
