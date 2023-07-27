@@ -1,0 +1,37 @@
+version: 2.1
+
+jobs:
+  Mega-Linter:
+    environment:
+      DEFAULT_WORKSPACE: /root/project
+    docker:
+      - image: oxsecurity/megalinter-go:v7
+        # checkov:skip=CKV_CIRCLECIPIPELINES_2:prefer mutable but stable tags
+    steps:
+      - checkout
+      - run:
+          command: |
+            sh /entrypoint.sh
+      - store_artifacts:
+          path: megalinter-reports
+  test:
+    docker:
+      - image: homebrew/brew:latest
+        # checkov:skip=CKV_CIRCLECIPIPELINES_1:prefer mutable but stable tags
+    steps:
+      - checkout
+      - run:
+          name: Test
+          command: |
+            brew bundle install
+            ./scripts/test.sh
+          environment:
+            HOMEBREW_BUNDLE_NO_LOCK: 1
+    environment:
+      STOW_TARGET: /opt/stow
+
+workflows:
+  CI:
+    jobs:
+      - Mega-Linter
+      - test
