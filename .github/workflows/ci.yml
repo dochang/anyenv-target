@@ -6,8 +6,6 @@ permissions:
   pull-requests: write
   # For GitHub Comment Reporter
   # https://megalinter.io/latest/reporters/GitHubCommentReporter/
-env:
-  STOW_TARGET: /opt/stow
 jobs:
   Mega-Linter:
     runs-on: ubuntu-latest

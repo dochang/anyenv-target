@@ -7,3 +7,4 @@ bats_modules
 coverage
 
 megalinter-reports/
+.stow/

@@ -27,8 +27,6 @@ jobs:
             ./scripts/test.sh
           environment:
             HOMEBREW_BUNDLE_NO_LOCK: 1
-    environment:
-      STOW_TARGET: /opt/stow
 
 workflows:
   CI:

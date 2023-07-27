@@ -1,6 +1,8 @@
 #!/bin/sh
 
-STOW_TARGET="${STOW_TARGET:-/opt/stow}"
+root_dir="$(readlink -f "$(dirname "$(dirname "$0")")")"
+
+STOW_TARGET="${STOW_TARGET:-${root_dir}/.stow}"
 export STOW_TARGET
 STOW_DIR="${STOW_DIR:-${STOW_TARGET}/stow}"
 export STOW_DIR
