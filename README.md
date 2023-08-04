@@ -2,6 +2,7 @@
 
 <!-- markdown-link-check-disable -->
 [![CI](https://github.com/dochang/anyenv-target/actions/workflows/ci.yml/badge.svg)](https://github.com/dochang/anyenv-target/actions/workflows/ci.yml)
+[![CircleCI](https://dl.circleci.com/status-badge/img/gh/dochang/anyenv-target/tree/master.svg?style=svg)](https://dl.circleci.com/status-badge/redirect/gh/dochang/anyenv-target/tree/master)
 [![codecov](https://codecov.io/gh/dochang/anyenv-target/branch/master/graph/badge.svg)](https://codecov.io/gh/dochang/anyenv-target)
 [![License](https://img.shields.io/badge/license-MIT-green)](https://dochang.mit-license.org/)
 [![Say Thanks!](https://img.shields.io/badge/say-thanks-green)](https://saythanks.io/to/dochang)
