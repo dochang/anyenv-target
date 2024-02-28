@@ -51,6 +51,6 @@ jobs:
           HOMEBREW_BUNDLE_NO_LOCK: 1
 
       - name: Coverage
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v4
         with:
           verbose: true
