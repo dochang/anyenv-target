@@ -50,7 +50,9 @@ jobs:
         env:
           HOMEBREW_BUNDLE_NO_LOCK: 1
 
-      - name: Coverage
+      - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4
         with:
           verbose: true
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
