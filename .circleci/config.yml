@@ -43,4 +43,5 @@ workflows:
     jobs:
       - MegaLinter:
           context: megalinter
-      - test
+      - test:
+          context: test
